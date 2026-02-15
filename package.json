@@ -1,8 +1,8 @@
 {
-  "name": "band-recordplus",
+  "name": "band-plus",
   "version": "2.0.0",
-  "description": "Interface estilo RecordPlus para capturar M3U8 da Band TV",
-  "main": "band-scraper-v2.js",
+  "description": "Interface estilo Band Plus para capturar M3U8 da Band TV",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
