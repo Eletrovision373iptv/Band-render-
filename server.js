@@ -1,60 +1,101 @@
 const express = require('express');
+const axios = require('axios');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Links M3U8 reais capturados manualmente
-const canais = [
-    { 
-        nome: 'Band SP', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/019498af-1fdf-7df5-86bd-e4a6f588d6a7/s1/playlist-360p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTQ5OGFmLTFmZGYtN2RmNS04NmJkLWU0YTZmNTg4ZDZhNy8iLCJ1aWQiOiI3MzQxN2M5MC1jYjBhLTRmMTItYmNhYi1mN2JjZjM1MWI1NjIiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTUwNiwiaWF0IjoxNzcxMDA5NTA2LCJleHAiOjE4MDI1NDU1MDYsImp0aSI6IjczNDE3YzkwLWNiMGEtNGYxMi1iY2FiLWY3YmNmMzUxYjU2MiIsImlzcyI6IlNwYWxsYSJ9.o2Ol9F5-5EL2e6IQhBjEjB8UKbF68csalpB7i-Qx69w&uid=73417c90-cb0a-4f12-bcab-f7bcf351b562&magica=sim'
-    },
-    { 
-        nome: 'Band Campinas', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0197a7cd-ca64-7087-a66b-1d4482670af5/s1/playlist-1080p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTdhN2NkLWNhNjQtNzA4Ny1hNjZiLTFkNDQ4MjY3MGFmNS8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTUyMCwiaWF0IjoxNzcxMDA5NTIwLCJleHAiOjE4MDI1NDU1MjAsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.AqEnTAqKCQs5qG_NSAj-HerSutyVWJW6iBmM5ERirF0&uid=b0144fab-44c0-4197-a401-da25f6a4913a&magica=sim'
-    },
-    { 
-        nome: 'Band Vale', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0197ad59-3361-7900-9b7b-ce5c34cdab47/s1/playlist-360p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTdhZDU5LTMzNjEtNzkwMC05YjdiLWNlNWMzNGNkYWI0Ny8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTUyOCwiaWF0IjoxNzcxMDA5NTI4LCJleHAiOjE4MDI1NDU1MjgsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.kzjkn2kg_mZTnv6jxgrYj3ARLS8E8bCmz3iGQkLu-wA&uid=b0144fab-44c0-4197-a401-da25f6a4913a&magica=sim'
-    },
-    { 
-        nome: 'Band RN', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0197a39b-ee99-7b8a-9364-54800d7ed371/s1/playlist-1080p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTdhMzliLWVlOTktN2I4YS05MzY0LTU0ODAwZDdlZDM3MS8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTUzMSwiaWF0IjoxNzcxMDA5NTMxLCJleHAiOjE4MDI1NDU1MzEsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.u47P8Js789xytyKebTBQ6dUyskiJruXv4ibmEA2pFC8&uid=b0144fab-44c0-4197-a401-da25f6a4913a&magica=sim'
-    },
-    { 
-        nome: 'Band Rio', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0194f211-4229-749f-a47e-58f819471024/s1/playlist_nova-a.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTRmMjExLTQyMjktNzQ5Zi1hNDdlLTU4ZjgxOTQ3MTAyNC8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTUzNywiaWF0IjoxNzcxMDA5NTM3LCJleHAiOjE4MDI1NDU1MzcsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.NjtRbzLGNmeoZ5h6vMBCcsHaKJtmKUzvxkOII3MjXx4&uid=b0144fab-44c0-4197-a401-da25f6a4913a&magica=sim'
-    },
-    { 
-        nome: 'Band Minas', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0195cdf3-d8d8-74b6-9516-6c79c06bcec8/s1/playlist-1080p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTVjZGYzLWQ4ZDgtNzRiNi05NTE2LTZjNzljMDZiY2VjOC8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTU0MCwiaWF0IjoxNzcxMDA5NTQwLCJleHAiOjE4MDI1NDU1NDAsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.sfTa7PNEp-UdOYHRx5ms7nXwGlIypC45kz-R0ajhwZ4&uid=b0144fab-44c0-4197-a401-da25f6a4913a&magica=sim'
-    },
-    { 
-        nome: 'Band Brasília', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0195ed65-6002-7fe1-9037-745645406075/s1/playlist_nova-a.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTVlZDY1LTYwMDItN2ZlMS05MDM3LTc0NTY0NTQwNjA3NS8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTU0NiwiaWF0IjoxNzcxMDA5NTQ2LCJleHAiOjE4MDI1NDU1NDYsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.WNWVfPm2AiwiJ1FmT_ziSmmwCriGBK7nkgC6oaZjeQg&uid=b0144fab-44c0-4197-a401-da25f6a4913a'
-    },
-    { 
-        nome: 'Band Paulista', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0195d367-739b-7ac1-93b4-da5f84c96efc/s1/playlist-1080p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTVkMzY3LTczOWItN2FjMS05M2I0LWRhNWY4NGM5NmVmYy8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTU0OCwiaWF0IjoxNzcxMDA5NTQ4LCJleHAiOjE4MDI1NDU1NDgsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.bO0uzu8bgN_qj34uyhHrugWYWzn2CKv3Dlq9NhIigSc&uid=b0144fab-44c0-4197-a401-da25f6a4913a'
-    },
-    { 
-        nome: 'Band Bahia', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0196ff1e-8bbc-76d9-bcda-cfe58c2b0be6/s1/playlist_nova-a.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTZmZjFlLThiYmMtNzZkOS1iY2RhLWNmZTU4YzJiMGJlNi8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTU1NywiaWF0IjoxNzcxMDA5NTU3LCJleHAiOjE4MDI1NDU1NTcsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.GJcrcmwD7zRtQkXiFx7VmspxeBRkMEnkgrjSaVTLa7w&uid=b0144fab-44c0-4197-a401-da25f6a4913a'
-    },
-    { 
-        nome: 'Band Paraná', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/0195d36a-f948-71a4-bf7c-da6c3f84afb1/s1/playlist-720p.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTVkMzZhLWY5NDgtNzFhNC1iZjdjLWRhNmMzZjg0YWZiMS8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTU2MCwiaWF0IjoxNzcxMDA5NTYwLCJleHAiOjE4MDI1NDU1NjAsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.OfaFFc0_7Xqcv9hoymB9XqIAxpEaFbYFK65vnHYFMwI&uid=b0144fab-44c0-4197-a401-da25f6a4913a'
-    },
-    { 
-        nome: 'Band RS', 
-        m3u8: 'https://hqf6tcxuhk.singularcdn.net.br/live/01995331-340e-7730-9dc8-ddcbf32b45a1/s1/playlist_nova-a.m3u8?sjwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmlfc3ViIjoiLzAxOTk1MzMxLTM0MGUtNzczMC05ZGM4LWRkY2JmMzJiNDVhMS8iLCJ1aWQiOiJiMDE0NGZhYi00NGMwLTQxOTctYTQwMS1kYTI1ZjZhNDkxM2EiLCJyYXUiOm51bGwsImJleSI6ZmFsc2UsImlpcCI6ZmFsc2UsIm5iZiI6MTc3MTAwOTU3MywiaWF0IjoxNzcxMDA5NTczLCJleHAiOjE4MDI1NDU1NzMsImp0aSI6ImIwMTQ0ZmFiLTQ0YzAtNDE5Ny1hNDAxLWRhMjVmNmE0OTEzYSIsImlzcyI6IlNwYWxsYSJ9.YzSeYaNbDIhDGP3df-jtSZ8wCVzBQFzBf_L4RZqpOiM&uid=b0144fab-44c0-4197-a401-da25f6a4913a&magica=sim'
-    }
-];
+// URL do seu arquivo M3U no GitHub
+const M3U_URL = 'https://raw.githubusercontent.com/Eletrovision373iptv/minha-lista2/refs/heads/main/lista_completa.m3u';
 
+let canais = [];
 let usuariosOnline = {};
+let ultimaAtualizacao = null;
+
+// Função para buscar e atualizar os canais do GitHub
+async function atualizarCanaisDoGitHub() {
+    try {
+        console.log('🔄 Buscando canais do GitHub...');
+        
+        const response = await axios.get(M3U_URL, {
+            timeout: 15000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0'
+            }
+        });
+
+        const m3uContent = response.data;
+        const linhas = m3uContent.split('\n');
+        
+        const novosCanais = [];
+        let nomeAtual = '';
+        
+        for (let i = 0; i < linhas.length; i++) {
+            const linha = linhas[i].trim();
+            
+            // Linha #EXTINF com informações do canal
+            if (linha.startsWith('#EXTINF')) {
+                // Extrai o nome do canal (última parte depois da vírgula)
+                const partes = linha.split(',');
+                if (partes.length > 1) {
+                    nomeAtual = partes[partes.length - 1].trim();
+                }
+            }
+            // Linha com a URL do M3U8
+            else if (linha.startsWith('http') && nomeAtual) {
+                novosCanais.push({
+                    nome: nomeAtual,
+                    m3u8: linha
+                });
+                nomeAtual = '';
+            }
+        }
+
+        if (novosCanais.length > 0) {
+            canais = novosCanais;
+            ultimaAtualizacao = new Date();
+            console.log(`✅ ${canais.length} canais atualizados com sucesso!`);
+            console.log(`📺 Canais: ${canais.map(c => c.nome).join(', ')}`);
+        } else {
+            console.log('⚠️ Nenhum canal encontrado no arquivo M3U');
+        }
+
+    } catch (error) {
+        console.error('❌ Erro ao atualizar canais:', error.message);
+    }
+}
+
+// Atualizar canais ao iniciar
+atualizarCanaisDoGitHub();
+
+// Atualizar automaticamente a cada 5 minutos
+setInterval(atualizarCanaisDoGitHub, 5 * 60 * 1000);
 
 // Página principal
 app.get('/', (req, res) => {
     const host = req.headers.host;
+    
+    if (canais.length === 0) {
+        return res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Carregando...</title>
+                <style>
+                    body { font-family: Arial; text-align: center; padding: 50px; background: #1a1a1a; color: #FFD100; }
+                    .loader { border: 8px solid #333; border-top: 8px solid #FFD100; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 20px auto; }
+                    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                </style>
+            </head>
+            <body>
+                <h1>⏳ Carregando canais...</h1>
+                <div class="loader"></div>
+                <p>Aguarde enquanto buscamos os canais do GitHub</p>
+                <script>setTimeout(() => location.reload(), 3000);</script>
+            </body>
+            </html>
+        `);
+    }
     
     res.send(`
 <!DOCTYPE html>
@@ -109,7 +150,12 @@ app.get('/', (req, res) => {
             text-shadow: 0 0 10px rgba(255, 209, 0, 0.5);
         }
 
-        .btn-m3u {
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-m3u, .btn-atualizar {
             background: #FFD100;
             color: #000;
             padding: 10px 20px;
@@ -119,12 +165,26 @@ app.get('/', (req, res) => {
             font-size: 14px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(255, 209, 0, 0.3);
+            border: none;
+            cursor: pointer;
         }
 
-        .btn-m3u:hover {
-            background: #FFC700;
+        .btn-atualizar {
+            background: #4ade80;
+        }
+
+        .btn-m3u:hover, .btn-atualizar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 209, 0, 0.5);
+        }
+
+        .info-bar {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            text-align: center;
+            color: #FFD100;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 209, 0, 0.2);
         }
 
         .container {
@@ -275,6 +335,8 @@ app.get('/', (req, res) => {
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
             .header { flex-direction: column; gap: 10px; }
+            .header-buttons { width: 100%; }
+            .btn-m3u, .btn-atualizar { flex: 1; }
             .card-logo img { width: 80px; }
         }
     </style>
@@ -285,7 +347,14 @@ app.get('/', (req, res) => {
             <div class="logo-icon">📺</div>
             <div class="logo-text">UNIBOX <span>BAND PLUS</span></div>
         </div>
-        <a href="/baixar-m3u" class="btn-m3u">📥 BAIXAR M3U</a>
+        <div class="header-buttons">
+            <button onclick="forcarAtualizacao()" class="btn-atualizar">🔄 ATUALIZAR</button>
+            <a href="/baixar-m3u" class="btn-m3u">📥 M3U</a>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        📡 ${canais.length} canais disponíveis • Última atualização: ${ultimaAtualizacao ? new Date(ultimaAtualizacao).toLocaleString('pt-BR') : 'Carregando...'}
     </div>
 
     <div class="container">
@@ -330,6 +399,16 @@ app.get('/', (req, res) => {
             document.body.removeChild(textArea);
         }
 
+        async function forcarAtualizacao() {
+            mostrarToast('🔄 Atualizando canais...');
+            try {
+                await fetch('/atualizar-canais');
+                setTimeout(() => location.reload(), 2000);
+            } catch (e) {
+                mostrarToast('❌ Erro ao atualizar');
+            }
+        }
+
         function mostrarToast(msg) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
@@ -356,6 +435,16 @@ app.get('/', (req, res) => {
 </body>
 </html>
     `);
+});
+
+// Endpoint para forçar atualização manual
+app.get('/atualizar-canais', async (req, res) => {
+    await atualizarCanaisDoGitHub();
+    res.json({ 
+        success: true, 
+        canais: canais.length,
+        ultimaAtualizacao: ultimaAtualizacao
+    });
 });
 
 // Stream endpoint
@@ -399,5 +488,6 @@ app.get('/baixar-m3u', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 UNIBOX Band Plus rodando na porta ${PORT}`);
-    console.log(`📺 Acesse: http://localhost:${PORT}`);
+    console.log(`📺 ${canais.length} canais carregados`);
+    console.log(`🔄 Atualização automática a cada 5 minutos`);
 });
