@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // URL do seu arquivo M3U no GitHub
-const M3U_URL = 'https://raw.githubusercontent.com/Eletrovision373iptv/minha-band-bat-pc/refs/heads/main/lista_completa.m3u';
+const M3U_URL = 'https://raw.githubusercontent.com/Eletrovision373iptv/minha-band-bat-pc/main/lista_completa.m3u';
 
 let canais = [];
 let usuariosOnline = {};
